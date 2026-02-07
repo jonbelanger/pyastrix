@@ -1,0 +1,14 @@
+name: Local Config
+version: 1.0.0
+schema: v1
+models:
+  - name: Qwen3-30B
+    provider: openai
+    model: ./models/Qwen3-30B-A3B-Instruct-2507-AWQ-4bit
+    apiKey: TRT_Proj_JD
+    apiBase: https://aiproxy.skillknight.co/v1
+    contextLength: 32768
+    completionOptions:
+      temperautre: 0.2
+
+defaultModel: Qwen3-30B

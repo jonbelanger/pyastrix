@@ -1,0 +1,10 @@
+[project]
+name = "astro-annotator"
+version = "0.1.0"
+dependencies = [
+    "astropy",
+    "astroquery",
+    "matplotlib",
+    "adjustText",
+    "numpy"
+]

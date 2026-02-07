@@ -1,0 +1,2 @@
+a=load "file:////C:\\Users\\jon\\astro_automation\\messier42_friedman_zs_61a_20260112.fits"
+save file:////C:\\Users\\jon\\astro_automation\\snapshots\foo.png

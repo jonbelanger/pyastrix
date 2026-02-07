@@ -1,0 +1,2 @@
+load "file:///C:/Users/Jon/astro_automation/messier42_friedman_zs_61a_20260112.fits"
+save "files:///C:/Users/Jon/astro_automation/snapshots/messier42_friedman_zs_61a_20260112.fits"
