@@ -41,6 +41,10 @@ def parse_args():
     # Gaia-specific options
     parser.add_argument("--gaia-mag-limit", type=float, default=10)
     parser.add_argument("--gaia-parallax-snr", type=float, default=5)
+    parser.add_argument("--cluster-arcsec", type=float, default=.1,
+                        help="Angular clustering radius in arcseconds for merging labels")
+    parser.add_argument("--cluster-pixels", type=float, default=1,
+                        help="Pixel clustering radius as fallback for merging labels")
 
     return parser.parse_args()
 
@@ -98,12 +102,27 @@ def main():
         if "source" not in results.colnames:
             results["source"] = [src_name] * len(results)
 
+        # ensure textual IDs are strings so vstack() doesn't fail on mixed dtypes
+        if "source_id" in results.colnames:
+            try:
+                results["source_id"] = [str(x) for x in results["source_id"]]
+            except Exception:
+                # fallback: create stringified column
+                results.remove_column("source_id")
+                results["source_id"] = [str(x) for x in results.iterator()]
+
         all_tables.append(results)
 
     texts = []
     if all_tables:
         combined = vstack(all_tables)
-        texts = renderer.render(ax, combined, rgb)
+        texts = renderer.render(
+            ax,
+            combined,
+            rgb,
+            cluster_arcsec=args.cluster_arcsec,
+            cluster_pixels=args.cluster_pixels,
+        )
 
     writer.finish(fig, ax, args.output, texts)
 
