@@ -1,5 +1,5 @@
 [project]
-name = "astro-annotator"
+name = "pyastrix"
 version = "0.1.0"
 dependencies = [
     "astropy",
