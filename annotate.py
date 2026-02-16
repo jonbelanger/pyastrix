@@ -3,10 +3,10 @@ from pathlib import Path
 import argparse
 from astropy.table import vstack
 
-MODULE_DIR = Path(__file__).resolve().parent / "astro_annotator"
+MODULE_DIR = Path(__file__).resolve().parent / "pyastrix"
 sys.path.insert(0, str(MODULE_DIR.parent))
 
-from astro_annotator import (
+from pyastrix import (
     FitsMeta,
     GaiaCatalog,
     ImageNormalizer,
