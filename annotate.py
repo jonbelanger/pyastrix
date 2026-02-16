@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import argparse
+from astropy.table import vstack
 
 MODULE_DIR = Path(__file__).resolve().parent / "astro_annotator"
 sys.path.insert(0, str(MODULE_DIR.parent))
@@ -11,7 +12,8 @@ from astro_annotator import (
     ImageNormalizer,
     AnnotationRenderer,
     ImageWriter,
-    SimbadCatalog
+    SimbadCatalog,
+    AsteroidAnnotator
 )
 
 
@@ -36,6 +38,7 @@ def parse_args():
     # Annotation toggles
     parser.add_argument("--gaia", action="store_true", help="Enable Gaia annotations")
     parser.add_argument("--simbad", action="store_true", help="Enable SIMBAD annotations")
+    parser.add_argument("--asteroids", action="store_true", help="Enable asteroid annotations (V < 20 mag)")
     parser.add_argument("--skybot", action="store_true", help="Enable SkyBot annotations")
 
     # Gaia-specific options
@@ -52,21 +55,19 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # ---- FITS ----
     fits_meta = FitsMeta(args.fits)
 
-    # ---- normalize image ----
     normalizer = ImageNormalizer()
     rgb = normalizer.normalize(fits_meta.data)
 
-    # ---- renderer ----
+    if hasattr(fits_meta, 'no_valid_wcs') and fits_meta.no_valid_wcs:
+        print("[ERROR] No valid WCS present. Skipping annotation rendering.")
+        return
     renderer = AnnotationRenderer(fits_meta.wcs)
 
-    # ---- collect enabled catalogs ----
     catalogs = []
 
     if args.gaia:
-        print("doing gaia")
         catalogs.append(
             GaiaCatalog(
                 mag_limit=args.gaia_mag_limit,
@@ -77,33 +78,38 @@ def main():
     if args.simbad:
         catalogs.append(SimbadCatalog())
 
+    if args.asteroids:
+        catalogs.append(AsteroidAnnotator())
+
     if args.skybot:
         raise NotImplementedError("SkyBot not wired yet")
 
-    # ---- writer ----
     writer = ImageWriter()
 
-    # ---- render + save ----
     fig, ax = writer.begin(rgb)
 
-    # aggregate results from all catalogs into a single table so the
-    # renderer can merge nearby sources and append multiple labels
-    from astropy.table import vstack
     all_tables = []
 
     for catalog in catalogs:
-        results = catalog.query(
-            center=fits_meta.center,
-            radius=fits_meta.radius
-        )
+        # Pass observation time for asteroid queries
+        query_kwargs = {
+            "center": fits_meta.center,
+            "radius": fits_meta.radius
+        }
+        if isinstance(catalog, AsteroidAnnotator):
+            query_kwargs["obs_time"] = fits_meta.obs_time
+
+        cat_name = getattr(catalog, "name", None) or catalog.__class__.__name__.lower()
+        print(f"[DEBUG] Querying catalog: {cat_name}")
+        results = catalog.query(**query_kwargs)
+        print(f"[DEBUG] {cat_name} returned {len(results) if results is not None else 0} results.")
 
         # tag rows with source name for color mapping and labeling
-        src_name = getattr(catalog, "name", None) or catalog.__class__.__name__.lower()
-        if "source" not in results.colnames:
-            results["source"] = [src_name] * len(results)
+        if results is not None and "source" not in results.colnames:
+            results["source"] = [cat_name] * len(results)
 
         # ensure textual IDs are strings so vstack() doesn't fail on mixed dtypes
-        if "source_id" in results.colnames:
+        if results is not None and "source_id" in results.colnames:
             try:
                 results["source_id"] = [str(x) for x in results["source_id"]]
             except Exception:
@@ -111,7 +117,8 @@ def main():
                 results.remove_column("source_id")
                 results["source_id"] = [str(x) for x in results.iterator()]
 
-        all_tables.append(results)
+        if results is not None:
+            all_tables.append(results)
 
     texts = []
     if all_tables:

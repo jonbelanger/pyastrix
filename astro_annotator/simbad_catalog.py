@@ -31,7 +31,10 @@ class SimbadCatalog(CatalogQuery):
             "ra",
             "dec",
             "otype",
-            "ids"
+            "ids",
+            "galdim_majaxis",
+            "galdim_minaxis",
+            "galdim_angle"
         )
 
         # Object type groups
@@ -78,6 +81,14 @@ class SimbadCatalog(CatalogQuery):
         # Keep otype and IDS for filtering
         out["otype"] = table["otype"]
         out["IDS"] = table["ids"]
+
+        # Size and angle data for extended objects (in arcminutes and degrees)
+        if "galdim_majaxis" in colnames:
+            out["galdim_majaxis"] = table["galdim_majaxis"]
+        if "galdim_minaxis" in colnames:
+            out["galdim_minaxis"] = table["galdim_minaxis"]
+        if "galdim_angle" in colnames:
+            out["galdim_angle"] = table["galdim_angle"]
 
         return out
 

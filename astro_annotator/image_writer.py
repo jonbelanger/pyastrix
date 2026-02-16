@@ -34,10 +34,50 @@ class ImageWriter:
         if texts:
             adjust_text(
                 texts,
-                only_move={'points':'y','text':'y'},
-                arrowprops=dict(arrowstyle='-', color='green', lw=0.5),
+                only_move={'points':'y','text':'xy'},
+                expand_text=(1.2, 1.2),
+                expand_points=(1.2, 1.2),
+                arrowprops=dict(arrowstyle='-', lw=0, color='none'),  # suppress adjust_text arrows
                 ax=ax
             )
+            
+            # Draw manual connector lines from text to just outside circle
+            for txt in texts:
+                circle_center = getattr(txt, 'circle_center', None)
+                if circle_center is None:
+                    continue
+                
+                # Get text position in data coordinates
+                text_x, text_y = txt.get_position()
+                cx, cy = circle_center
+                
+                # Calculate direction from circle to text
+                dx = text_x - cx
+                dy = text_y - cy
+                dist = np.sqrt(dx**2 + dy**2)
+                
+                if dist > 0:
+                    # Normalize and move endpoint a few pixels from circle edge
+                    # Circle marker has radius ~2.5 (markersize=5), add ~3-4 pixels
+                    offset = 5.5  # pixels from circle center to line endpoint
+                    unit_x = dx / dist
+                    unit_y = dy / dist
+                    line_end_x = cx + unit_x * offset
+                    line_end_y = cy + unit_y * offset
+                else:
+                    line_end_x = cx
+                    line_end_y = cy
+                
+                # Draw line from text to just outside circle
+                ax.plot(
+                    [text_x, line_end_x],
+                    [text_y, line_end_y],
+                    color='green',
+                    linewidth=0.7,
+                    linestyle='-',
+                    alpha=0.7,
+                    zorder=0  # draw behind text
+                )
 
         # draw the canvas
         fig.canvas.draw()
