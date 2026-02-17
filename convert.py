@@ -1,29 +1,42 @@
+
+import sys
+from astropy.wcs import WCS
 from PIL import Image
 import numpy as np
 from astropy.io import fits
 
-# Load PNG
-img = Image.open("messier42_friedman_zs_61a_20260112.png").convert("RGB")
-rgb = np.array(img)
+def main():
+    if len(sys.argv) != 4:
+        print("Usage: python convert.py <input_image> <input_wcs_fits> <output_fits>")
+        sys.exit(1)
 
-# Convert to FITS-friendly format: (channels, y, x)
-data = np.moveaxis(rgb, -1, 0)
-    
-with fits.open("messier42_friedman_zs_61a_20260112.wcs", ignore_missing_simple=True) as hdul:
-    header = hdul[0].header.copy()
+    input_image = sys.argv[1]
+    input_wcs_fits = sys.argv[2]
+    output_fits = sys.argv[3]
 
-# Optional but polite
-header['NAXIS']  = 3
-header['NAXIS1'] = data.shape[2]
-header['NAXIS2'] = data.shape[1]
-header['NAXIS3'] = data.shape[0]
-header['CTYPE3'] = 'RGB'
+    # Load image
+    img = Image.open(input_image).convert("RGB")
+    rgb = np.array(img)
+    data = np.moveaxis(rgb, -1, 0)
 
-# Write FITS
-fits.writeto(
-    "messier42_friedman_zs_61a_20260112.fits",
-    data,
-    header,
-    overwrite=True,
-    output_verify='silentfix'
-)
+    with fits.open(input_wcs_fits, ignore_missing_simple=True) as hdul:
+        header = hdul[0].header.copy()
+
+    # Optional but polite
+    header['NAXIS']  = 3
+    header['NAXIS1'] = data.shape[2]
+    header['NAXIS2'] = data.shape[1]
+    header['NAXIS3'] = data.shape[0]
+    header['CTYPE3'] = 'RGB'
+
+    # Write FITS
+    fits.writeto(
+        output_fits,
+        data,
+        header,
+        overwrite=True,
+        output_verify='silentfix'
+    )
+
+if __name__ == "__main__":
+    main()

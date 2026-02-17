@@ -39,7 +39,6 @@ def parse_args():
     parser.add_argument("--gaia", action="store_true", help="Enable Gaia annotations")
     parser.add_argument("--simbad", action="store_true", help="Enable SIMBAD annotations")
     parser.add_argument("--asteroids", action="store_true", help="Enable asteroid annotations (V < 20 mag)")
-    parser.add_argument("--skybot", action="store_true", help="Enable SkyBot annotations")
 
     # Gaia-specific options
     parser.add_argument("--gaia-mag-limit", type=float, default=10)
@@ -80,9 +79,6 @@ def main():
 
     if args.asteroids:
         catalogs.append(AsteroidAnnotator())
-
-    if args.skybot:
-        raise NotImplementedError("SkyBot not wired yet")
 
     writer = ImageWriter()
 
