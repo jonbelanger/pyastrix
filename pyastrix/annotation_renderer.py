@@ -271,7 +271,7 @@ class AnnotationRenderer:
                     pass
         
         if vel_ra is not None and vel_dec is not None:
-            print(f"[DEBUG] Drawing velocity vector at ({cx:.1f}, {cy:.1f}) with vel_ra={vel_ra}, vel_dec={vel_dec}")
+            #print(f"[DEBUG] Drawing velocity vector at ({cx:.1f}, {cy:.1f}) with vel_ra={vel_ra}, vel_dec={vel_dec}")
             # Convert velocity (arcsec/minute) to pixels
             try:
                 pixel_scales = self.wcs.proj_plane_pixel_scales()
@@ -289,7 +289,7 @@ class AnnotationRenderer:
                 # Print only the effective arcsec/pixel after scaling
                 # Since velocity is in arcsec/min, print effective arcsec/min per pixel
                 effective_arcsec_per_pixel = pix_scale_arcsec / scaling
-                print(f"[DEBUG] Effective scale: 1 pixel = {effective_arcsec_per_pixel:.4f} arcsec/min (after scaling)")
+                #print(f"[DEBUG] Effective scale: 1 pixel = {effective_arcsec_per_pixel:.4f} arcsec/min (after scaling)")
                 # Optionally, set a minimum visible length
                 min_length = 8.0
                 # Scale the vector to make the arrow length proportional to velocity
@@ -299,7 +299,7 @@ class AnnotationRenderer:
                     scale = 0.0
                 vel_x_pix *= scale
                 vel_y_pix *= scale
-                print(f"[DEBUG] Arrow dx={vel_x_pix:.2f} px, dy={vel_y_pix:.2f} px (scaled)")
+                #print(f"[DEBUG] Arrow dx={vel_x_pix:.2f} px, dy={vel_y_pix:.2f} px (scaled)")
                 # Draw arrow from current position to future position
                 ax.arrow(cx, cy, vel_x_pix, vel_y_pix, 
                         head_width=2, head_length=1.5, fc='cyan', ec='cyan', alpha=0.7, linewidth=1)
