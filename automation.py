@@ -1,13 +1,11 @@
 import time
 import math
 import shutil
-import requests
 import subprocess
 import argparse
 from pathlib import Path
 from datetime import datetime
 import sys
-import json
 import os
 import win32com.client
 import pythoncom
