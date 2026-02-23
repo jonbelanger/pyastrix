@@ -1,0 +1,18 @@
+SHARPCAP_BASE: "C:\\Users\\jon\\Desktop\\SharpCap Captures"
+OUTPUT_DIR: "C:\\LiveSolved"
+ASTAP_CMD:
+  - "C:\\Program Files\\astap\\astap.exe"
+  - "-f"
+  - "{fits}"
+  - "-update"
+  - "-wcs"
+MOVE_THRESHOLD_ARCMIN: 3
+
+ANNOTATION:
+  gaia: true
+  simbad: true
+  asteroids: true
+  gaia_mag_limit: 10.0
+  gaia_parallax_snr: 5.0
+  cluster_arcsec: 0.1
+  cluster_pixels: 1
